@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Analyseur de Téléphone</title>
   <style>
     body {
@@ -47,11 +48,9 @@
       let marque = "Inconnue";
       let modele = "Inconnu";
       if (os === "Android") {
-        // On cherche un segment du type "; <modele> Build/"
         const match = userAgent.match(/;\s([^;]+?)\sBuild\//);
         if (match && match[1]) {
           modele = match[1].trim();
-          // On peut déduire la marque en prenant la première partie (ex : "SM" dans "SM-G950F")
           const possibleMarque = modele.split('-')[0];
           marque = possibleMarque;
         }
@@ -63,20 +62,15 @@
     }
 
     document.getElementById('analyserBtn').addEventListener('click', async function() {
-      // Récupération de la date et de l'heure actuelles
       const currentDate = new Date();
       const date = currentDate.toLocaleDateString();
       const heure = currentDate.toLocaleTimeString();
-
-      // Détection du système d'exploitation via le userAgent
       let os = "Inconnu";
       if (navigator.userAgent.match(/Android/i)) {
         os = "Android";
       } else if (navigator.userAgent.match(/iPhone/i)) {
         os = "iPhone";
       }
-
-      // Récupération du niveau de batterie via l'API Battery (si supportée)
       let batterie = "Non supporté";
       if (navigator.getBattery) {
         try {
@@ -86,29 +80,16 @@
           batterie = "Erreur lors de la récupération";
         }
       }
-
-      // Extraction des informations de marque et de modèle à partir du userAgent
       const userAgent = navigator.userAgent;
       const deviceInfo = extractDeviceInfo(userAgent, os);
-
-      // Récupération de la mémoire RAM (en Go) via l'API (si supportée)
       const deviceMemory = navigator.deviceMemory || "inconnue";
-
-      // Récupération de la résolution d'écran et du pixel ratio
       const resolution = window.screen.width + " x " + window.screen.height;
       const pixelRatio = window.devicePixelRatio || 1;
-
-      // Orientation de l'écran
       const orientation = (screen.orientation && screen.orientation.type) || "inconnue";
-
-      // Vérification iCloud pour iPhone (simulation)
       let infoCloud = "";
       if (os === "iPhone") {
         infoCloud = "Vérification iCloud: OK";
       }
-
-      // Critères d'analyse pour déterminer si le téléphone est « Bon Téléphone » ou « Mauvais Téléphone »
-      // Exemple : Batterie > 20% et RAM d'au moins 2 Go (ces critères sont arbitraires)
       let analyse = "";
       if (typeof batterie === "string" && batterie.endsWith("%")) {
         const batValue = parseFloat(batterie);
@@ -124,8 +105,6 @@
           analyse = "Mauvais Téléphone";
         }
       }
-
-      // Affichage de toutes les informations collectées
       document.getElementById('result').innerHTML = `
         <p><strong>Date :</strong> ${date}</p>
         <p><strong>Heure :</strong> ${heure}</p>
@@ -248,4 +227,4 @@
   </script>
 
 </body>
-  </html>
+</html>
