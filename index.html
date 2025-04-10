@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Analyseur de Téléphone</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: yellow;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    #result {
+      background: yellow;
+      padding: 20px;
+      margin-top: 20px;
+      display: inline-block;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: orange;
+      color: yellow;
+    }
+    footer {
+      margin-top: 20px;
+      font-size: 14px;
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+  <h1>Analyseur de Téléphone</h1>
+  <button id="analyserBtn">Analyser le Téléphone</button>
+  <div id="result"></div>
+  <footer>©Provided by: Bimpe Stonehenge Jr.®</footer>
+
+  <script>
+    // Fonction d'extraction d'informations à partir du userAgent
+    function extractDeviceInfo(userAgent, os) {
+      let marque = "Inconnue";
+      let modele = "Inconnu";
+      if (os === "Android") {
+        // On cherche un segment du type "; <modele> Build/"
+        const match = userAgent.match(/;\s([^;]+?)\sBuild\//);
+        if (match && match[1]) {
+          modele = match[1].trim();
+          // On peut déduire la marque en prenant la première partie (ex : "SM" dans "SM-G950F")
+          const possibleMarque = modele.split('-')[0];
+          marque = possibleMarque;
+        }
+      } else if (os === "iPhone") {
+        modele = "iPhone";
+        marque = "Apple";
+      }
+      return { marque, modele };
+    }
+
+    document.getElementById('analyserBtn').addEventListener('click', async function() {
+      // Récupération de la date et de l'heure actuelles
+      const currentDate = new Date();
+      const date = currentDate.toLocaleDateString();
+      const heure = currentDate.toLocaleTimeString();
+
+      // Détection du système d'exploitation via le userAgent
+      let os = "Inconnu";
+      if (navigator.userAgent.match(/Android/i)) {
+        os = "Android";
+      } else if (navigator.userAgent.match(/iPhone/i)) {
+        os = "iPhone";
+      }
+
+      // Récupération du niveau de batterie via l'API Battery (si supportée)
+      let batterie = "Non supporté";
+      if (navigator.getBattery) {
+        try {
+          const battery = await navigator.getBattery();
+          batterie = (battery.level * 100) + "%";
+        } catch (e) {
+          batterie = "Erreur lors de la récupération";
+        }
+      }
+
+      // Extraction des informations de marque et de modèle à partir du userAgent
+      const userAgent = navigator.userAgent;
+      const deviceInfo = extractDeviceInfo(userAgent, os);
+
+      // Récupération de la mémoire RAM (en Go) via l'API (si supportée)
+      const deviceMemory = navigator.deviceMemory || "inconnue";
+
+      // Récupération de la résolution d'écran et du pixel ratio
+      const resolution = window.screen.width + " x " + window.screen.height;
+      const pixelRatio = window.devicePixelRatio || 1;
+
+      // Orientation de l'écran
+      const orientation = (screen.orientation && screen.orientation.type) || "inconnue";
+
+      // Vérification iCloud pour iPhone (simulation)
+      let infoCloud = "";
+      if (os === "iPhone") {
+        infoCloud = "Vérification iCloud: OK";
+      }
+
+      // Critères d'analyse pour déterminer si le téléphone est « Bon Téléphone » ou « Mauvais Téléphone »
+      // Exemple : Batterie > 20% et RAM d'au moins 2 Go (ces critères sont arbitraires)
+      let analyse = "";
+      if (typeof batterie === "string" && batterie.endsWith("%")) {
+        const batValue = parseFloat(batterie);
+        if (batValue > 20 && deviceMemory !== "inconnue" && deviceMemory >= 2) {
+          analyse = "Bon Téléphone";
+        } else {
+          analyse = "Mauvais Téléphone";
+        }
+      } else {
+        if (deviceMemory !== "inconnue" && deviceMemory >= 2) {
+          analyse = "Bon Téléphone";
+        } else {
+          analyse = "Mauvais Téléphone";
+        }
+      }
+
+      // Affichage de toutes les informations collectées
+      document.getElementById('result').innerHTML = `
+        <p><strong>Date :</strong> ${date}</p>
+        <p><strong>Heure :</strong> ${heure}</p>
+        <p><strong>Système d'exploitation :</strong> ${os}</p>
+        <p><strong>User Agent :</strong> ${userAgent}</p>
+        <p><strong>Marque :</strong> ${deviceInfo.marque}</p>
+        <p><strong>Modèle :</strong> ${deviceInfo.modele}</p>
+        <p><strong>Batterie :</strong> ${batterie}</p>
+        <p><strong>Mémoire RAM (Go) :</strong> ${deviceMemory}</p>
+        <p><strong>Résolution :</strong> ${resolution}</p>
+        <p><strong>Pixel Ratio :</strong> ${pixelRatio}</p>
+        <p><strong>Orientation :</strong> ${orientation}</p>
+        ${os === "iPhone" ? `<p><strong>iCloud :</strong> ${infoCloud}</p>` : ""}
+        <hr>
+        <h2>${analyse}</h2>
+      `;
+    });
+  </script>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Menu Trois Points</title>
+  <style>
+    /* Styles généraux */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: red;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    /* Conteneur du menu des trois points */
+    .menu-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: inline-block;
+    }
+
+    /* Style du bouton (les trois points) */
+    .menu-button {
+      background: black;
+      border: none;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    /* Style du contenu du menu (initialement caché) */
+    .menu-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 30px;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 5px;
+      padding: 10px;
+      width: 250px;
+    }
+
+    .menu-content p {
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    /* Style pour le bouton d'analyse */
+    #analyserBtn {
+      display: block;
+      margin: 40px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: orange;
+      color: black;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Menu des trois points -->
+  <div class="menu-container">
+    <button id="menuButton" class="menu-button">⋮</button>
+    <div id="menuContent" class="menu-content">
+      <p><strong>Créateur :</strong> Bimpe Stonehenge Jr. vivant en côte d'ivoire dans la ville d agnibilekrou au quartier résidentiel pour ceux qui veulent le contacter recherché Bimpe Stonehege Jr. sur tout les réseaux sociaux et pour son numéro WhatsApp et telegram c est le [+225 0594685427]</p>
+      <p><strong>Comment fonctionne le site :</strong> Cette application analyse les caractéristiques de votre téléphone, comme la marque, le modèle, la batterie, la RAM, etc.</p>
+      <p><strong>Comment l'utiliser :</strong> Cliquez sur le bouton "Analyser le Téléphone" pour obtenir les informations de votre appareil.</p>
+    </div>
+  </div>
+
+  <script>
+    // Gestion de l'affichage du menu
+    document.getElementById('menuButton').addEventListener('click', function(event) {
+      var menuContent = document.getElementById('menuContent');
+      // Bascule l'affichage du menu
+      menuContent.style.display = (menuContent.style.display === 'block') ? 'none' : 'block';
+      // Empêche la propagation de l'événement pour éviter la fermeture immédiate
+      event.stopPropagation();
+    });
+
+    // Ferme le menu si l'utilisateur clique en dehors
+    window.addEventListener('click', function() {
+      var menuContent = document.getElementById('menuContent');
+      if (menuContent.style.display === 'block') {
+        menuContent.style.display = 'none';
+      }
+    });
+
+    // Empêche la fermeture du menu lors d'un clic à l'intérieur de celui-ci
+    document.getElementById('menuContent').addEventListener('click', function(event) {
+      event.stopPropagation();
+    });
+  </script>
+
+</body>
+  </html>
